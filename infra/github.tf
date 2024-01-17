@@ -30,3 +30,7 @@ output "repo_html_url" {
 output "repo_ssh_url" {
   value = github_repository.gatsby_playground.ssh_clone_url
 }
+
+output "pages_url" {
+  value = github_repository.gatsby_playground.pages[0].html_url
+}
