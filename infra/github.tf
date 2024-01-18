@@ -23,6 +23,18 @@ resource "github_repository" "gatsby_playground" {
   }
 }
 
+resource "github_actions_secret" "discord_webhook_id" {
+  repository       = github_repository.gatsby_playground.name
+  secret_name      = "discord_webhook_id"
+  plaintext_value  = discord_webhook.for_github_actions.id
+}
+
+resource "github_actions_secret" "discord_webhook_token" {
+  repository       = github_repository.gatsby_playground.name
+  secret_name      = "discord_webhook_token"
+  plaintext_value  = discord_webhook.for_github_actions.token
+}
+
 output "repo_html_url" {
   value = github_repository.gatsby_playground.html_url
 }

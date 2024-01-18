@@ -1,0 +1,45 @@
+name: Send discord message
+description: Sends a discord message based on a job status
+
+inputs:
+  webhook_id:
+    description: "Discord webhook id"
+    required: true
+
+  webhook_token:
+    description: "Discord webhook token"
+    required: true
+
+  success_message:
+    description: "Message to send on success"
+    required: true
+
+  status:
+    description: "Status used to choose message"
+    default: success
+
+  error_message:
+    description: "Message to send on failure"
+
+runs:
+  using: "composite"
+  steps:
+    - name: set discord message
+      shell: bash
+      id: discord_message
+      if: always()
+      run: |
+        if [ ${{ inputs.status }} == 'success' ]; then
+          message="${{ inputs.success_message }}"
+        else
+          message="${{ inputs.error_message }}"
+        fi
+
+        echo "DISCORD_MESSAGE=[#${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) | $message" >> $GITHUB_OUTPUT
+
+    - uses: appleboy/discord-action@v1.0.0
+      if: always()
+      with:
+        webhook_id: ${{ inputs.webhook_id }}
+        webhook_token: ${{ inputs.webhook_token }}
+        message: ${{ steps.discord_message.outputs.DISCORD_MESSAGE }}

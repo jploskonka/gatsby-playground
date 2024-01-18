@@ -18,6 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/discord-message
+        with:
+          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          success_message: ":hourglass_flowing_sand: Build started..."
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: web/.nvmrc
@@ -35,6 +42,16 @@ jobs:
         with:
           path: web/public
 
+      - uses: ./.github/actions/discord-message
+        if: always()
+        with:
+          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          status: ${{ job.status }}
+          success_message: ":white_check_mark: Build finished OK"
+          error_message: ":red_square: Build failed"
+
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -47,3 +64,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/deploy-pages@v2
         id: deployment
+
+      - uses: ./.github/actions/discord-message
+        if: always()
+        with:
+          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          status: ${{ job.status }}
+          success_message: ":white_check_mark: Deploy completed. See the page at ${{ steps.deployment.outputs.page_url }}"
+          error_message: ":red_square: Deploy failed"
